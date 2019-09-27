@@ -1,7 +1,23 @@
 import 'rbx/index.css';
 import { Button, Container, Title } from 'rbx';
 import React, { useState, useEffect} from 'react';
+import firebase from 'firebase/app';
+import 'firebase/database';
 
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDK454axAEoICoj0T8dZ52xZlnQmgR9Q5U",
+  authDomain: "scheduler-883aa.firebaseapp.com",
+  databaseURL: "https://scheduler-883aa.firebaseio.com",
+  projectId: "scheduler-883aa",
+  storageBucket: "scheduler-883aa.appspot.com",
+  messagingSenderId: "323894437433",
+  appId: "1:323894437433:web:2922305ff91a27015acfe8",
+  //measurementId: "G-VNGPBQ8DJ8"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database().ref();
 
 const timeParts = meets => {
   const [match, days, hh1, mm1, hh2, mm2] = meetsPat.exec(meets) || [];
@@ -29,7 +45,6 @@ const days = ['M', 'Tu', 'W', 'Th', 'F'];
 
 const meetsPat = /^ *((?:M|Tu|W|Th|F)+) +(\d\d?):(\d\d) *[ -] *(\d\d?):(\d\d) *$/;
 
-
 const addCourseTimes = course => ({
   ...course,
   ...timeParts(course.meets)
@@ -37,8 +52,9 @@ const addCourseTimes = course => ({
 
 const addScheduleTimes = schedule => ({
   title: schedule.title,
-  courses: schedule.courses.map(addCourseTimes)
+  courses: Object.values(schedule.courses).map(addCourseTimes)
 });
+
 
 const Banner = ({ title }) => (
   <Title>{ title || '[loading...]' }</Title>
@@ -57,8 +73,12 @@ const buttonColor = selected => (
 );
 
 const hasConflict = (course, selected) => (
-  selected.some(selection => courseConflict(course, selection))
+  selected.some(selection => course !== selection && courseConflict(course, selection))
 );
+
+// const hasConflict = (course, selected) => (
+//   selected.some(selection => courseConflict(course, selection))
+// );
 
 const daysOverlap = (days1, days2) => ( 
   days.some(day => days1.includes(day) && days2.includes(day))
@@ -77,15 +97,31 @@ const courseConflict = (course1, course2) => (
   && getCourseTerm(course1) === getCourseTerm(course2)
   && timeConflict(course1, course2)
 );
+
+const saveCourse = (course, meets) => {
+  db.child('courses').child(course.id).update({meets})
+    .catch(error => alert(error));
+};
+
+const moveCourse = course => {
+  const meets = prompt('Enter new meeting data, in this format:', course.meets);
+  if (!meets) return;
+  const {days} = timeParts(meets);
+  if (days) saveCourse(course, meets); 
+  else moveCourse(course);
+};
+
+
   
 const Course = ({ course, state }) => (
   <Button color={ buttonColor(state.selected.includes(course)) }
-    onClick={ () => state.toggle(course) }
-    disabled={ hasConflict(course, state.selected) }
-    >
-    { getCourseTerm(course) } CS { getCourseNumber(course) }: { course.title }
-  </Button>
-);
+      onClick={ () => state.toggle(course) }
+      onDoubleClick={ () => moveCourse(course) }
+      disabled={ hasConflict(course, state.selected) }
+      >
+      { getCourseTerm(course) } CS { getCourseNumber(course) }: { course.title }
+    </Button>
+  );
 
 const TermSelector = ({ state }) => (
   <Button.Group hasAddons>
@@ -121,22 +157,20 @@ const CourseList = ({ courses }) => {
 
 const App = () => {
   const [schedule, setSchedule] = useState({ title: '', courses: [] });
-  const url = '/data/cs-courses.json';
+
   useEffect(() => {
-    const fetchSchedule =  async () => {
-      const response = await fetch(url);
-      if (!response.ok) throw response;
-      const json = await response.json();
-      setSchedule(addScheduleTimes(json));
+    const handleData = snap => {
+      if (snap.val()) setSchedule(addScheduleTimes(snap.val()));
     }
-    fetchSchedule();
-  }, [])
+    db.on('value', handleData, error => alert(error));
+    return () => { db.off('value', handleData); };
+  }, []);
 
   return (
-    <Container>
-      <Banner title={ schedule.title } />
-      <CourseList courses={ schedule.courses } />
-    </Container>
+      <Container>
+        <Banner title={ schedule.title } />
+        <CourseList courses={ schedule.courses } />
+      </Container>
   );
 };
 
