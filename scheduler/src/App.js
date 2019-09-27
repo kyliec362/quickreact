@@ -30,8 +30,8 @@ const CourseList = ({ courses }) => (
 
 const App = () => {
   const [schedule, setSchedule] = useState({ title: '', courses: [] });
-  const url = 'https://www.cs.northwestern.edu/academics/courses/394/data/cs-courses.php';
-
+  //const url = 'https://www.cs.northwestern.edu/academics/courses/394/data/cs-courses.php';
+  const url = '/data/cs-courses.json';
   useEffect(() => {
     const fetchSchedule = async () => {
       const response = await fetch(url);
