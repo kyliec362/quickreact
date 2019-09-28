@@ -8,12 +8,10 @@ const hoursOverlap = (hours1, hours2) => (
   Math.max(hours1.start, hours2.start) < Math.min(hours1.end, hours2.end)
 );
 
-// eslint-disable-next-line
 const hasConflict = (course, selected) => (
   selected.some(selection => courseConflict(course, selection))
 );
 
-// eslint-disable-next-line
 const timeParts = meets => {
   const [match, days, hh1, mm1, hh2, mm2] = meetsPat.exec(meets) || [];
   return !match ? {} : {
@@ -24,7 +22,6 @@ const timeParts = meets => {
     }
   };
 };
-
 
 const meetsPat = /^ *((?:M|Tu|W|Th|F)+) +(\d\d?):(\d\d) *[ -] *(\d\d?):(\d\d) *$/;
 
@@ -41,5 +38,4 @@ const courseConflict = (course1, course2) => (
   && timeConflict(course1, course2)
 );
 
-export { hasConflict } from './times';
-export { timeParts } from './times';
+export { hasConflict, timeParts }; 

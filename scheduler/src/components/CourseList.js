@@ -13,7 +13,8 @@ const useSelection = () => {
 
 const TermSelector = ({ state }) => (
   <Button.Group hasAddons>
-  { Object.values(terms)
+  { 
+    Object.values(terms)
       .map(value => 
         <Button key={value}
           color={ buttonColor(value === state.term) }
@@ -30,7 +31,7 @@ const CourseList = ({ courses, user }) => {
   const [term, setTerm] = useState('Fall');
   const [selected, toggle] = useSelection();
   const termCourses = courses.filter(course => term === getCourseTerm(course));
-  
+  console.log(termCourses)
   return (
     <React.Fragment>
       <TermSelector state={ { term, setTerm } } />

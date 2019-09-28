@@ -16,6 +16,7 @@ const firebaseConfig = {
     storageBucket: "scheduler-883aa.appspot.com",
     messagingSenderId: "323894437433",
     appId: "1:323894437433:web:2922305ff91a27015acfe8",
+    measurementId: "G-VNGPBQ8DJ8",
   };
   
 firebase.initializeApp(firebaseConfig);

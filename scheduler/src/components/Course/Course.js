@@ -41,6 +41,4 @@ const Course = ({ course, state, user }) => (
   </Button>
 );
 export default Course;
-export { buttonColor } from './Course';
-export { terms } from './Course';
-export { getCourseTerm } from './Course';
+export { buttonColor, terms, getCourseTerm };
