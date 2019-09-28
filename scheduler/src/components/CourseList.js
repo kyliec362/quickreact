@@ -31,7 +31,6 @@ const CourseList = ({ courses, user }) => {
   const [term, setTerm] = useState('Fall');
   const [selected, toggle] = useSelection();
   const termCourses = courses.filter(course => term === getCourseTerm(course));
-  console.log(termCourses)
   return (
     <React.Fragment>
       <TermSelector state={ { term, setTerm } } />
